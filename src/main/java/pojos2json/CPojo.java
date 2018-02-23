@@ -1,40 +1,64 @@
 package pojos2json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonGetter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * CPojo class implementation
+ * CPojo class implementation with some examples.
  */
 public class CPojo implements IPojo
 {
+    // name key "statistical_data"
+    @JsonProperty( "statistical_data" )
+    private final List<List<Number>> m_statistics;
 
-    @JsonProperty( "statistics" )
-    private final List<List<Number>> m_statistics = Collections.synchronizedList( new ArrayList<>() );
+    // don't serialize name member to json
+    @JsonIgnore
+    private final String m_name;
 
-    @JsonProperty( "name" )
-    private final String m_name = this.toString();
-
-    CPojo()
+    CPojo( final String p_name )
     {
-        // add a random amount of max 10 numbers
-        IntStream
-                .range( 1, ThreadLocalRandom.current().nextInt( 11 ) )
-                .parallel()
-                .forEach( i -> m_statistics.add( Collections.synchronizedList( new ArrayList<>() ) ) );
+        m_name = p_name;
+
+        // add a random amount of max 10 number slots
+        m_statistics = Collections.synchronizedList(
+                IntStream
+                        .range( 1, ThreadLocalRandom.current().nextInt( 11 ) )
+                        .mapToObj( i -> Collections.synchronizedList( new ArrayList<Number>() ) )
+                        .collect( Collectors.toList() )
+        );
     }
 
     @Override
     public IPojo call()
     {
-        m_statistics
-                .parallelStream()
-                .forEach( s -> s.add( ThreadLocalRandom.current().nextInt( 10 ) ) );
+        // adds a random integer [0, 9] to each slot
+        m_statistics.forEach( s -> s.add( ThreadLocalRandom.current().nextInt( 10 ) ) );
         return this;
+    }
+
+    public String name()
+    {
+        return m_name;
+    }
+
+    /**
+     * Declare method statistic as a getter.
+     * It lazy-calculates the statistical data of Lists (containing sub-Lists with Numbers).
+     * Name the key 'average' instead of the method name.
+     */
+    @JsonGetter("statistical_summary")
+    public DoubleSummaryStatistics statistic()
+    {
+        return m_statistics
+                .stream()
+                .flatMap( Collection::stream )
+                .collect( Collectors.summarizingDouble( Number::doubleValue ) );
     }
 }
