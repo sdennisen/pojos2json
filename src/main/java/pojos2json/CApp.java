@@ -37,7 +37,7 @@ public final class CApp
     {
         // create a map of 10 pojos
         final Map<String, IPojo> l_pojos = IntStream.range( 0, 10 )
-                .mapToObj( i -> new CPojo( String.valueOf( i ) ) )
+                .mapToObj( i -> new CPojo( String.format("Pojo-%d", i) ) )
                 .collect( Collectors.toMap( CPojo::name, Function.identity() ) );
 
         // let the pojos add 10 statistical values by calling each 10 times
