@@ -14,6 +14,8 @@ import java.util.stream.IntStream;
 public class CPojo implements IPojo
 {
 
+    // properties appear in the order they are defined here
+
     @JsonProperty( "statistics" )
     private final List<List<Number>> m_statistics = Collections.synchronizedList( new ArrayList<>() );
 
