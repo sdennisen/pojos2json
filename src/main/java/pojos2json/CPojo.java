@@ -49,9 +49,9 @@ public class CPojo implements IPojo
     }
 
     /**
-     * Declare method statistic as a getter.
+     * Declare method statistic as a JsonGetter.
      * It lazy-calculates the statistical data of Lists (containing sub-Lists with Numbers).
-     * Name the key 'average' instead of the method name.
+     * Name the key 'statistical_summary' instead of the method name.
      */
     @JsonGetter("statistical_summary")
     public DoubleSummaryStatistics statistic()
